@@ -51,6 +51,7 @@ services:
     volumes:
       - ${TRAFFIC_DIR_HOST}:${TRAFFIC_DIR_DOCKER}:ro,z
     environment:
+      SERVICES: ${SERVICES}
       TIMESCALE: ${TIMESCALE}
       TULIP_TRAFFIC_DIR: ${TRAFFIC_DIR_DOCKER}
       FLAG_REGEX: ${FLAG_REGEX}
