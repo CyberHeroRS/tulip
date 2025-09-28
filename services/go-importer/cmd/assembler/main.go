@@ -113,6 +113,8 @@ func reassemblyCallback(entry db.FlowEntry) {
 			ApplyFlagTags(&entry, flag_regex, flagValidator)
 		}
 
+		ApplyAddFirewallTags(&entry)
+
 		// Apply flagid in / out
 		if *flagid {
 			unix := time.Now().Unix()

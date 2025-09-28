@@ -131,3 +131,44 @@ func ApplyFlagids(flow *db.FlowEntry, flagidsDb []db.FlagId) {
 		flow.Flagids = append(flow.Flagids, flagids[match])
 	}
 }
+
+var firewallRx = regexp.MustCompile(`\n{3}!!RULE:([^!]+)!!(?:!!(FIREWALL_AUDIT|FIREWALL_BLOCK|FIREWALL_BLOCKED)!!)$`)
+
+func ApplyAddFirewallTags(flow *db.FlowEntry) {
+	var toAdd []string
+
+	for i := range flow.Flow {
+		item := &flow.Flow[i]
+		data := item.Data
+
+		idxs := firewallRx.FindSubmatchIndex(data)
+		if idxs == nil {
+			continue
+		}
+
+		fullStart := idxs[0]
+		ruleStart, ruleEnd := idxs[2], idxs[3]
+		actStart, actEnd := idxs[4], idxs[5]
+
+		ruleName := string(data[ruleStart:ruleEnd])
+		action := string(data[actStart:actEnd])
+
+		toAdd = append(toAdd, "rule-"+ruleName)
+		switch action {
+		case "FIREWALL_AUDIT":
+			toAdd = append(toAdd, "audit")
+		case "FIREWALL_BLOCK":
+			toAdd = append(toAdd, "blocked")
+		case "FIREWALL_BLOCKED":
+			toAdd = append(toAdd, "blocked")
+		}
+
+		item.Data = data[:fullStart]
+	}
+
+	for _, tag := range toAdd {
+		if !contains(flow.Tags, tag) {
+			flow.Tags = append(flow.Tags, tag)
+		}
+	}
+}
