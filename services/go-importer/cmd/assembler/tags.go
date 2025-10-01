@@ -132,7 +132,7 @@ func ApplyFlagids(flow *db.FlowEntry, flagidsDb []db.FlagId) {
 	}
 }
 
-var firewallRx = regexp.MustCompile(`\n{3}!!RULE:([^!]+)!!(?:!!(FIREWALL_AUDIT|FIREWALL_BLOCK|FIREWALL_BLOCKED)!!)$`)
+var firewallRx = regexp.MustCompile(`\n{3}!!RULE:([^!]+)!!\|!!(FIREWALL_AUDIT|FIREWALL_BLOCK|FIREWALL_BLOCKED)!!$`)
 
 func ApplyAddFirewallTags(flow *db.FlowEntry) {
 	var toAdd []string
