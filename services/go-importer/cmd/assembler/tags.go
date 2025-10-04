@@ -141,8 +141,6 @@ func ApplyAddFirewallTags(flow *db.FlowEntry) {
 		item := &flow.Flow[i]
 		data := item.Data
 
-		log.Println("Firewall tags")
-
 		idxs := firewallRx.FindSubmatchIndex(data)
 		if idxs == nil {
 			continue
