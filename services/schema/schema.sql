@@ -16,6 +16,7 @@ INSERT INTO tag (name) VALUES
 	('flagid-in'),
 	('flagid-out'),
 	('blocked'),
+	('allowed')
 	('audit'),
 	('suricata'),
 	('starred');

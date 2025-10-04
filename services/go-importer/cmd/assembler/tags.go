@@ -132,7 +132,7 @@ func ApplyFlagids(flow *db.FlowEntry, flagidsDb []db.FlagId) {
 	}
 }
 
-var firewallRx = regexp.MustCompile(`\n{3}!!RULE:([^!]+)!!\|!!(FIREWALL_AUDIT|FIREWALL_BLOCK|FIREWALL_BLOCKED)!!$`)
+var firewallRx = regexp.MustCompile(`\n{3}!!RULE:([^!]+)!!\|!!(FIREWALL_AUDIT|FIREWALL_ALLOW|FIREWALL_BLOCK|FIREWALL_BLOCKED)!!$`)
 
 func ApplyAddFirewallTags(flow *db.FlowEntry) {
 	var toAdd []string
@@ -140,6 +140,8 @@ func ApplyAddFirewallTags(flow *db.FlowEntry) {
 	for i := range flow.Flow {
 		item := &flow.Flow[i]
 		data := item.Data
+
+		log.Println("Firewall tags")
 
 		idxs := firewallRx.FindSubmatchIndex(data)
 		if idxs == nil {
@@ -155,6 +157,8 @@ func ApplyAddFirewallTags(flow *db.FlowEntry) {
 
 		toAdd = append(toAdd, "rule-"+ruleName)
 		switch action {
+		case "FIREWALL_ALLOW":
+			toAdd = append(toAdd, "allowed")
 		case "FIREWALL_AUDIT":
 			toAdd = append(toAdd, "audit")
 		case "FIREWALL_BLOCK":
