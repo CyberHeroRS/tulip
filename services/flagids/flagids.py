@@ -64,7 +64,11 @@ def update_flagids():
 
     with db.connection() as conn:
         with conn.cursor() as cur:
-            cur.executemany("INSERT INTO flag_id (content) VALUES (%s)", rows)
+            cur.executemany(
+                "INSERT INTO flag_id (content) VALUES (%s) "
+                "ON CONFLICT (content) DO UPDATE SET time = EXCLUDED.time",
+                rows,
+            )
             conn.commit()
 
 

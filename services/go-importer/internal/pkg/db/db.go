@@ -589,23 +589,20 @@ func (db *Database) FingerprintsFlush() {
 	}
 }
 
-// Flag ids
-type FlagId struct {
-	Id int32
-	Content string
-	Time time.Time
-}
-
 // Query all valid flag ids
-func (db *Database) FlagIdsQuery(lifetime int) ([]FlagId, error) {
-	rows, _ := db.pool.Query(context.Background(), `
-		SELECT *
+func (db *Database) FlagIdsQuery(lifetime int) ([]string, error) {
+	rows, err := db.pool.Query(context.Background(), `
+		SELECT DISTINCT content
 		FROM flag_id
 		WHERE time > @time_limit
+		ORDER BY content
 	`, pgx.NamedArgs {
 		"time_limit": time.Now().Add(-time.Duration(float64(lifetime) * float64(time.Second))),
 	});
+	if err != nil {
+		return nil, err
+	}
 	defer rows.Close()
 
-	return pgx.CollectRows(rows, pgx.RowToStructByName[FlagId])
+	return pgx.CollectRows(rows, pgx.RowTo[string])
 }

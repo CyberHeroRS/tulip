@@ -22,11 +22,9 @@ INSERT INTO tag (name) VALUES
 -- Flag ids
 CREATE TABLE flag_id (
 	id serial NOT NULL PRIMARY KEY,
-	content text NOT NULL,
+	content text NOT NULL UNIQUE,
 	time timestamptz NOT NULL DEFAULT now()
 );
-
-CREATE INDEX ON flag_id USING btree (content);
 
 -- Pcaps
 CREATE TABLE pcap (

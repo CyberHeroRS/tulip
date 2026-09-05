@@ -5,8 +5,6 @@ import (
 
 	"log"
 	"regexp"
-
-	"github.com/cloudflare/ahocorasick"
 )
 
 var flagRegex *regexp.Regexp
@@ -93,19 +91,15 @@ func ApplyFlagTags(flow *db.FlowEntry, reg *string, flagValidator FlagValidator)
 
 // Apply flagids to the entire flow.
 // This assumes the `Data` part of the flowItem is already pre-processed, s.t.
-func ApplyFlagids(flow *db.FlowEntry, flagidsDb []db.FlagId) {
-
-	var flagids []string
+func ApplyFlagids(flow *db.FlowEntry, flagids *flagIDMatcher) {
+	if flagids.matcher == nil {
+		return
+	}
 	var matches = make(map[int]int)
 
-	for _, flagid := range flagidsDb {
-		flagids = append(flagids, flagid.Content)
-	}
-
-	matcher := ahocorasick.NewStringMatcher(flagids)
 	for idx := 0; idx < len(flow.Flow); idx++ {
 		flowItem := &flow.Flow[idx]
-		found := matcher.Match([]byte(flowItem.Data))
+		found := flagids.matcher.MatchThreadSafe(flowItem.Data)
 
 		if len(found) > 0 {
 			var tag string
@@ -128,6 +122,6 @@ func ApplyFlagids(flow *db.FlowEntry, flagidsDb []db.FlagId) {
 	}
 
 	for match, _ := range matches {
-		flow.Flagids = append(flow.Flagids, flagids[match])
+		flow.Flagids = append(flow.Flagids, flagids.contents[match])
 	}
 }

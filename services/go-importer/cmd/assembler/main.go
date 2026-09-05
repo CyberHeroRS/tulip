@@ -91,9 +91,7 @@ var g_db *db.Database
 var workerPool *workerpool.WorkerPool
 var flagValidator FlagValidator
 
-// flagid caching (only once per tick)
-var flagids []db.FlagId
-var flagidUpdate int64 = 0
+var flagids flagIDCache
 
 // TODO; FIXME; RDJ; this is kinda gross, but this is PoC level code
 func reassemblyCallback(entry db.FlowEntry) {
@@ -115,16 +113,11 @@ func reassemblyCallback(entry db.FlowEntry) {
 
 		// Apply flagid in / out
 		if *flagid {
-			unix := time.Now().Unix()
-			if flagidUpdate+int64(*ticklength) < unix {
-				flagidUpdate = unix
-				zwi, err := g_db.FlagIdsQuery(*flaglifetime)
-				if err != nil {
-					log.Fatal(err)
-				}
-				flagids = zwi
+			matcher, err := flagids.get(g_db, *flaglifetime, time.Duration(*ticklength)*time.Second)
+			if err != nil {
+				log.Fatal(err)
 			}
-			ApplyFlagids(&entry, flagids)
+			ApplyFlagids(&entry, matcher)
 		}
 
 		// Finally, insert the new entry
