@@ -1,4 +1,5 @@
 #!/bin/env python
+import math
 import os
 import time
 from datetime import datetime
@@ -67,21 +68,23 @@ def update_flagids():
             conn.commit()
 
 
+def next_scrape_at(now: float, start: float, tick_length: int, delay: int) -> float:
+    first_scrape = start + delay
+    tick = max(0, math.floor((now - first_scrape) / tick_length) + 1)
+    return first_scrape + tick * tick_length
+
+
 def main():
     start_datetime = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S%z")
-    unixtime = time.mktime(start_datetime.timetuple())
+    start_timestamp = start_datetime.timestamp()
     while True:
         try:
+            now = time.time()
+            scrape_at = next_scrape_at(now, start_timestamp, tick_length, DELAY)
+            time.sleep(max(0, scrape_at - now))
+
             if flagid_scrape_enabled:
                 update_flagids()
-            crnt_time = time.time()
-            time_diff = max(0, crnt_time - unixtime)
-            wait = (
-                DELAY
-                + tick_length * (time_diff // tick_length)
-                + time_diff % tick_length
-            )
-            time.sleep(wait)
         except Exception as e:
             print("ERROR: ", e, flush=True)
             time.sleep(10)
