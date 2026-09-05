@@ -52,7 +52,7 @@ jobs:
           image_name: ${{ github.repository }}-timescale
           github_token: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: services/timescale/Dockerfile
-          context: services/timescale
+          context: services
 
       - name: Build and publish a Docker image for ${{ github.repository }}-frontend
         uses: macbre/push-to-ghcr@master

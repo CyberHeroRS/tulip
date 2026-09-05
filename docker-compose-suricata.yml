@@ -1,7 +1,9 @@
 version: "3.5"
 services:
   timescale:
-    build: services/timescale
+    build:
+      context: services
+      dockerfile: timescale/Dockerfile
     image: tulip-timescale:latest
     restart: unless-stopped
     volumes:

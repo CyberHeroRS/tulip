@@ -1,13 +1,10 @@
 version: "3.5"
 services:
   timescale:
-    image: ghcr.io/openattackdefensetools/tulip-timescale:latest
+    image: ghcr.io/cyberherors/tulip-timescale:latest
     restart: unless-stopped
     volumes:
     - timescale-data:/var/lib/postgresql/data
-    - ./services/schema/system.sql:/docker-entrypoint-initdb.d/100_system.sql:ro
-    - ./services/schema/functions.sql:/docker-entrypoint-initdb.d/101_functions.sql:ro
-    - ./services/schema/schema.sql:/docker-entrypoint-initdb.d/102_schema.sql:ro
     networks:
       - internal
     environment:
